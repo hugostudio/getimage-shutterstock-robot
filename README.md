@@ -1,0 +1,1 @@
+Detalhamento do projeto

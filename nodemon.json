@@ -1,0 +1,10 @@
+{
+  "watch": [
+    "src"
+  ],
+  "ext": "ts,json",
+  "ignore": [
+    "src/**/*.spec.ts"
+  ],
+  "exec": "ts-node-dev --inspect=8182 --respawn src/server.ts"
+}

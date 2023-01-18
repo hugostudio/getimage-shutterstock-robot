@@ -1,0 +1,47 @@
+version: '3.6'
+
+services:
+  redis:
+    build: ./docker/redis/.
+    ports: 
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks: 
+      - robot-network
+    container_name: redis
+
+  database:
+    build: ./docker/database/.
+    ports: 
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    networks: 
+      - robot-network
+    container_name: database
+
+  web:
+    build: ./docker/web/.
+    environment:
+      - DATABASE_URL=postgresql://dev:dev@database:5432/robotDB?schema=public
+      - DATABASE_PORT=${DATABASE_PORT}
+      - HTTP_PORT=${HTTP_PORT}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
+      - PARSER_JSON_LIMIT=${PARSER_JSON_LIMIT}
+      - QUEUE_URI_MONITOR=${QUEUE_URI_MONITOR}
+      - QUEUE_DEFAULT=${QUEUE_DEFAULT}
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"    
+      - "5859:5859"
+    volumes: 
+      - ./:/robotBase
+    networks: 
+      - robot-network
+    working_dir: /robotBase
+    command: sh -c "npm install && npm run build && cd dist && node server.js"
+    depends_on:
+      - redis
+      - database
+    container_name: web
+
+networks:
+  robot-network:
+    driver: bridge
