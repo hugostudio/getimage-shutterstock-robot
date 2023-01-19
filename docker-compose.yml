@@ -1,13 +1,13 @@
 version: '3.6'
 
 services:
-  redis:
-    build: ./docker/redis/.
-    ports: 
-      - "${REDIS_PORT}:${REDIS_PORT}"
-    networks: 
-      - robot-network
-    container_name: redis
+  # redis:
+  #   build: ./docker/redis/.
+  #   ports: 
+  #     - "${REDIS_PORT}:${REDIS_PORT}"
+  #   networks: 
+  #     - robot-network
+  #   container_name: redis
 
   web:
     build: ./docker/web/.
@@ -26,9 +26,9 @@ services:
     networks: 
       - robot-network
     working_dir: /robotBase
-    command: sh -c "npm install && npm run build && cd dist && node server.js"
-    depends_on:
-      - redis
+    command: sh -c "npm install -g npm@9.3.1 && npm install && npm run build && cd dist && node server.js"
+    # depends_on:
+    #   - redis
     container_name: web
 
 networks:

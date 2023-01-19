@@ -2,3 +2,4 @@
 .vscode
 /docker
 /node_modules
+data.json

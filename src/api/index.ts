@@ -1,7 +1,7 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import getImageRouter from "./robot/robot.controller";
+import getImageRouter from "./robotController";
 
 
 dotenv.config();
