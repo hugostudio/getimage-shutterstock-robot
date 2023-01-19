@@ -15,7 +15,7 @@ getImageRouter.post("/by-now", async (req: Request, res: Response) => {
   let result : any;
   const param = req.body;
   result = await RobotService.execute(param);  
-  RobotService.deleteAllTempArchive();
+  //RobotService.deleteAllTempArchive();
   res.set('Content-Type','application/octet-stream');
   res.set('Content-Disposition',`attachment; filename=${result.fileName}`);
   res.set('Content-Length',result.data.length);

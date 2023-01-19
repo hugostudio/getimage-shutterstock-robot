@@ -4,13 +4,12 @@ import { join } from 'path';
 import { image } from 'image-downloader';
 import { AnyNode, load as _load } from 'cheerio';
 import requestPromise from 'request-promise';
+import sharp from 'sharp';
+
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-const imageMagick = require('gm').subClass({
-  imageMagick: true,
-});
 const log = true;
 const tempArchivePath = './images/shutterstock';
 export const QUEUE_NAME = process.env.QUEUE_DEFAULT;
@@ -185,9 +184,10 @@ async function cropImages (images: string | any[]) {
   for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
     try {
       imageName = images[imageIndex];
-      await cropImage(imageName, 390, 260, imageName);
+      const output = imageName.replace('original', 'final-img');
+      await cropImage(imageName, 390, 260, output);
       if (log) {
-        console.log('>>> Cortada [%s]', imageName);
+        console.log('>>> Cortada [%s]', output);
       }
     } catch (error) {
       console.log(`Erro [${imageName}]: ${error}`);
@@ -207,19 +207,16 @@ async function downloadAndSave(url: any, filePath: string, fileName: string){
   });
 };
 
-//const gm = require("gm");
 async function cropImage ( inputFile: any, width: number, height: number, outputFile: any) {
   return new Promise<void>((resolve, reject) => {
-    const input = inputFile;
-    const output = outputFile;
-    imageMagick(input)
-      .crop(width, height, 0, 0)
-      .write(output, (error: any) => {
-        if (error) {
-          return reject(error);
-        }
-        resolve();
-      });
+    sharp(inputFile)
+    .extract({ left: 0, top: 0, width: width, height: height })
+    .toFile(outputFile, function(error) {
+      if (error) {
+        return reject(error);
+      }
+      resolve();
+    });    
   });
 }
 
@@ -229,7 +226,8 @@ async function createZipArchive(zipName:string) {
   try {
     const zip = new AdmZip();
     const outputFile = zipName + ".zip";
-    zip.addLocalFolder(tempArchivePath);
+    zip.addLocalFolder(tempArchivePath, '', new RegExp(/-final-img/gm) );
+    //zip.writeZip(outputFile);
     const fileBuffer = zip.toBuffer();
     console.log(`Created ${outputFile} successfully`);
     return { data: fileBuffer, fileName: outputFile};
@@ -237,14 +235,5 @@ async function createZipArchive(zipName:string) {
     console.log(`Something went wrong. ${e}`);
   }
 }
-
-// export async function deleteAllTempArchive() {
-//   try {
-//     rmdirSync(tempArchivePath, { recursive: true })
-//     console.log(`${tempArchivePath} is deleted!`)
-//   } catch (err) {
-//     console.error(`Error while deleting ${tempArchivePath}.`)
-//   }
-// }
 
 export default robotServer;
