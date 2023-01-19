@@ -1,12 +1,13 @@
 import { Router } from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-import countRouter from "./count";
+import getImageRouter from "./robot/robot.controller";
+
 
 dotenv.config();
 
 const apiRouter = Router();
 apiRouter.use(bodyParser.json({ limit: process.env.PARSER_JSON_LIMIT }));
-apiRouter.use("/count", countRouter);
+apiRouter.use("/get-image", getImageRouter);
 
 export default apiRouter;
