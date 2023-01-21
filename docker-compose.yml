@@ -5,9 +5,16 @@ services:
     build: ./docker/web/.
     environment:
       - HTTP_PORT=${HTTP_PORT}
+      - REDIS_HOST=redis
+      - REDIS_PORT=${REDIS_PORT}
       - PARSER_JSON_LIMIT=${PARSER_JSON_LIMIT}
+      - QUEUE_URI_MONITOR=${QUEUE_URI_MONITOR}
+      - QUEUE_DEFAULT=${QUEUE_DEFAULT}
     ports:
-      - "${HTTP_PORT}:3000"
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "5859:5859"
+    expose:
+      - "${HTTP_PORT}"
     volumes:
       - ./:/robotBase
     working_dir: /robotBase
