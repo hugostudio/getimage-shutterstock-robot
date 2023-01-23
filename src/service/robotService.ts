@@ -1,6 +1,7 @@
-
-import { existsSync, mkdirSync, rm } from 'fs';
-import { join } from 'path';
+import AdmZip from "adm-zip";
+import * as fs from 'fs';
+import fsPromises from 'fs/promises'
+import path, { join } from 'path';
 import { image } from 'image-downloader';
 import { AnyNode, load as _load } from 'cheerio';
 import requestPromise from 'request-promise';
@@ -11,18 +12,10 @@ dotenv.config();
 const imageMagick = require('gm').subClass({
   imageMagick: true,
 });
-const log = true;
-const tempArchivePath = './images/shutterstock';
-export const QUEUE_NAME = process.env.QUEUE_DEFAULT;
 
-
-/**
- * //instalação do  graphicsmagick / imagemagick
- * sudo add-apt-repository ppa:dhor/myway
- * sudo apt-get update
- * sudo apt-get install graphicsmagick
- * sudo apt-get install imagemagick
- */
+const imageTempDir = process.env.IMAGE_TEMP_DIR as string;
+const appPath = process.env.APP_PATH as string;
+export const QUEUE_NAME = process.env.QUEUE_DEFAULT as string;
 
 const robotServer = {
   execute: async (data: any) => {
@@ -44,17 +37,16 @@ const robotServer = {
   },
   
   deleteAllTempArchive: async () =>{
+    const downloadDir = path.join(appPath,imageTempDir);
     try {
-      rm(tempArchivePath,{ recursive: true }, (err) => { 
-        if (err) {  console.error(err);  } 
-        else { console.log(`${tempArchivePath} is deleted!`);}
-      });
+      await emptyFolder(downloadDir);
+      //fs.rmSync(downloadDir,{ recursive: true })
+      console.log(`${downloadDir} is deleted!`);
     } catch (err) {
-      console.error(`Error while deleting ${tempArchivePath}.`)
+      console.error(`Error while deleting ${downloadDir}.`)
     }
   }
 };
-
 
 async function fetchImages(data : any) {
   // contar as sentenças
@@ -73,14 +65,12 @@ async function fetchImages(data : any) {
 
   const sKeyword = data.title.keyword.toLowerCase();
 
-  if (log) {
-    console.log('> Palavra chave [%s]', sKeyword);
-    console.log(
-      '> Quantidade de imagem esperada (sentenças) [%d]',
-      qtdSentencas,
-    );
-  }
-
+  console.log('> Palavra chave [%s]', sKeyword);
+  console.log(
+    '> Quantidade de imagem esperada (sentenças) [%d]',
+    qtdSentencas,
+  );
+  
   const sUrl = `https://www.shutterstock.com/en/search/${encodeURI(
     sKeyword,
   )}?search_source=base_landing_page&orientation=horizontal&image_type=photo&mreleased=true`;
@@ -135,26 +125,13 @@ async function scraperImagesPage(options: any, max: number) {
 async function downloadAllImages (images: string | any[]) {
   const urlImagesDownloadeds: any[] = [];
   const imagesDownloadeds = [];
-  let filePath = 'images';
-  if (!existsSync(filePath)) {
-    // criando o diretório
-    mkdirSync(filePath);
-    if (log) {
-      console.log('> Diretório criado [%s]', filePath);
-    }
+  const downloadDir = path.join(appPath,imageTempDir);
+  if (!fs.existsSync(downloadDir)) {    
+    console.log('> Diretório [%s] não existe !', downloadDir);    
+  } else {
+    console.log('> downloadDir : ', downloadDir);    
   }
 
-  filePath = 'images/shutterstock';
-  if (!existsSync(filePath)) {
-    mkdirSync(filePath);
-    if (log) {
-      console.log('> Diretório criado [%s]', filePath);
-    }
-  } else {
-    if (log) {
-      console.log('> Diretório destino [%s]', filePath);
-    }
-  }
   let imageName;
   for (let imageIndex = 0; imageIndex < images.length; imageIndex++) {
     const imageUrl = images[imageIndex];
@@ -164,16 +141,14 @@ async function downloadAllImages (images: string | any[]) {
         imageName = `${imageIndex + 1}-original.jpg`;
         const imageDownloaded = await downloadAndSave(
           imageUrl,
-          filePath,
+          imageTempDir,
           imageName,
         );
         imagesDownloadeds.push(imageDownloaded);
         urlImagesDownloadeds.push(imageUrl);
       }
     } catch (error) {
-      if (log) {
-        console.log(`Erro [${imageName}] (${imageUrl}): ${error}`);
-      }
+      console.log(`Erro [${imageName}] (${imageUrl}): ${error}`);
     }
   }
   return imagesDownloadeds;
@@ -186,9 +161,7 @@ async function cropImages (images: string | any[]) {
     try {
       imageName = images[imageIndex];
       await cropImage(imageName, 390, 260, imageName);
-      if (log) {
-        console.log('>>> Cortada [%s]', imageName);
-      }
+      console.log('>>> Cortada [%s]', imageName);
     } catch (error) {
       console.log(`Erro [${imageName}]: ${error}`);
     }
@@ -200,9 +173,7 @@ async function downloadAndSave(url: any, filePath: string, fileName: string){
     url: url,
     dest: join('../../', filePath, fileName),
   }).then(({ filename }) => {
-    if (log) {
-      console.log('>> Sucesso [%s]', filename);
-    }
+    console.log('>> Sucesso [%s]', filename);    
     return filename;
   });
 };
@@ -223,28 +194,29 @@ async function cropImage ( inputFile: any, width: number, height: number, output
   });
 }
 
-import AdmZip from "adm-zip";
-
 async function createZipArchive(zipName:string) {
   try {
     const zip = new AdmZip();
     const outputFile = zipName + ".zip";
-    zip.addLocalFolder(tempArchivePath);
+    zip.addLocalFolder(path.join(appPath,imageTempDir));
     const fileBuffer = zip.toBuffer();
     console.log(`Created ${outputFile} successfully`);
     return { data: fileBuffer, fileName: outputFile};
   } catch (e) {
-    console.log(`Something went wrong. ${e}`);
+    console.log(`Algo deu errado !. ${e}`);
   }
 }
 
-// export async function deleteAllTempArchive() {
-//   try {
-//     rmdirSync(tempArchivePath, { recursive: true })
-//     console.log(`${tempArchivePath} is deleted!`)
-//   } catch (err) {
-//     console.error(`Error while deleting ${tempArchivePath}.`)
-//   }
-// }
-
+async function emptyFolder (folderPath: any){
+  try {
+      // Find all files in the folder
+      const files = await fsPromises.readdir(folderPath);
+      for (const file of files) {
+          await fsPromises.unlink(path.resolve(folderPath, file));
+          console.log(`${folderPath}/${file} has been removed successfully`);
+      }
+  } catch (err){
+      console.log(err);
+  }
+}
 export default robotServer;

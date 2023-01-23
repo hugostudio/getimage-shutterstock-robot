@@ -2,7 +2,7 @@ POST http://localhost:{{$dotenv HTTP_PORT}}/api/get-image/by-now HTTP/1.1
 content-type: application/json
 
 {
-  "audio": {
+  "audio": {  
     "linkView": "https://drive.google.com/file/d/1vIXsUQ_ohSHaLk5V9iynTGbLT1YHKlHc/view?usp=drivesdk",
     "linkDownload": "https://drive.google.com/uc?id=1vIXsUQ_ohSHaLk5V9iynTGbLT1YHKlHc&export=download",
     "fileName": "audios.zip"

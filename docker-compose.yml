@@ -2,7 +2,10 @@ version: '3.6'
 
 services:
   shutterstock:
-    build: ./docker/web/.
+    build:
+      context: .
+      args:
+          HTTP_PORT: ${HTTP_PORT}
     environment:
       - HTTP_PORT=${HTTP_PORT}
       - REDIS_HOST=redis
@@ -10,13 +13,12 @@ services:
       - PARSER_JSON_LIMIT=${PARSER_JSON_LIMIT}
       - QUEUE_URI_MONITOR=${QUEUE_URI_MONITOR}
       - QUEUE_DEFAULT=${QUEUE_DEFAULT}
+      - IMAGE_TEMP_DIR=/temp_images
+      - APP_PATH=/robotBase
     ports:
       - "${HTTP_PORT}:${HTTP_PORT}"
       - "5859:5859"
     expose:
       - "${HTTP_PORT}"
-    volumes:
-      - ./:/robotBase
-    working_dir: /robotBase
-    command: sh -c "npm install -g npm@9.3.1 && npm install && npm run build && cd dist && node server.js"
+    command: sh -c "cd dist && node server.js"
     container_name: shutterstock

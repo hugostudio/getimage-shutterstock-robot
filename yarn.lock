@@ -1567,6 +1567,11 @@ grapheme-splitter@^1.0.4:
   resolved "https://registry.npmjs.org/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
+graphicsmagick@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.npmjs.org/graphicsmagick/-/graphicsmagick-0.0.1.tgz"
+  integrity sha512-gOi18BRscOlT9851djya76BY1eOI0651LORQyIyA/cb4oPBzeK9Hixz2f+ey5QXnEHnjU5K+Qy4VGrFMYsI1Xw==
+
 har-schema@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/har-schema/-/har-schema-2.0.0.tgz"
@@ -1685,6 +1690,11 @@ image-downloader@^4.3.0:
   integrity sha512-UBioN0E+8zu8N0lLC6wkZmPA/MA1A3yx9B1whjy5O/YiOV9XrSxLLKi7JqLLj6knQ3n9N1OBoHFS7shp8sehBQ==
   dependencies:
     follow-redirects "^1.15.0"
+
+imagemagick@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.npmjs.org/imagemagick/-/imagemagick-0.1.3.tgz"
+  integrity sha512-HIwwW10UdwsWcHETt5BPrnEkaJSFLiW1dYDlPYV0EXyj2zJY28iXimPWlZDsOpxVghmF5EuUjYOvJZhZS4Y10g==
 
 import-fresh@^3.0.0, import-fresh@^3.2.1:
   version "3.3.0"

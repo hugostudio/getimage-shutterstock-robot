@@ -1,5 +1,15 @@
+.git
 .env
 .vscode
+/test
 /docker
 /node_modules
+
 data.json
+.gitignore
+.prettierrc.js
+Dockerfile
+nodemon.json
+package-lock.json
+README.md
+yarn.lock
